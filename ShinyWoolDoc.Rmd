@@ -1,0 +1,73 @@
+---
+title: "ShinyWoolyDoc"
+author: "Tonya Filz"
+date: "11/8/2017"
+runtime: shiny
+output: html_document
+---
+
+This is a basic example of running a shiny app in an Rmd document. You can see that in this example there is no 'ui' or 'server' function called. Because of the 'runtime: shiny' in the YAML header, this Rmd document knows that shiny functions could be called. Pretty cool, huh?
+
+```{r, echo=FALSE}
+selectInput("wool",
+            "wool",
+            choices = levels(warpbreaks$wool))
+
+df_subset <- reactive({
+  a <- subset(warpbreaks, wool == input$wool)
+  return(a)
+})
+
+renderTable(df_subset())
+```
+
+The above example works great for simple shiny functions with no fancy formatting, but what about a more complex example? For more complex examples, you may be able to embed the Shiny app in an Rmd document.
+
+```{r, echo=FALSE}
+library(shiny)
+library(plotly)
+library(shinythemes)
+
+ui <- fluidPage(
+  theme = shinytheme("superhero"),
+   titlePanel("A Wooly Run Time Example"),
+   
+   sidebarLayout(
+      sidebarPanel( 
+         selectInput("wool",
+                     "Wool",
+                     choices = levels(warpbreaks$wool))
+      ),
+      
+      mainPanel(
+         plotlyOutput("plot")
+      )
+   )
+)
+
+server <- function(input, output, session) {
+     output$plot <- renderPlotly({
+     plot_ly(subset(warpbreaks, wool==input$wool), x= ~tension, y= ~breaks)
+   })
+}
+
+shinyApp(ui, server)
+```
+
+While it's handy to be able to quickly call shiny function and to be able to run a shiny app by copying and pasting code over. Copying and pasting code over from an existing app is clunky at best. Thankfully, there's an easier way.
+
+```{r, echo=FALSE}
+shinyAppDir("/Users/tonyafilz/Documents/Webinars/Shiny\ in\ Rmd/SplitWoolApp",
+  options=list(
+    width="75%", height=400
+  )
+) 
+```
+
+What if you've already deployed this app to shinyapps.io or RStudio Connect and you want to embed the application in your Rmd document? Yep, you guessed it, you can do that as well.
+
+```{r, echo=FALSE}
+knitr::include_app("https://tonya-rstudio.shinyapps.io/ShinyinRmd/")
+```
+
+So there you have it, a Shiny wooly RMarkdown document four different ways!
